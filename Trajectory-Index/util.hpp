@@ -14,6 +14,7 @@
 
 class TrjNode;
 class QuadTreeNode;
+class DbscanClass;
 class Util
 {
 public:
@@ -36,7 +37,29 @@ public:
     
     static std::vector<TrjNode*> getCoverTrj(TrjNode* trjNode, QuadTreeNode* quadTreeNode, double r);
     
+    static std::vector<TrjNode*> getCoverTrjByRR(TrjNode* trjNode, QuadTreeNode* quadTreeNode, double rr);
+    
     static void printNodeId(std::vector<TrjNode*> data);
+    
+    static bool vectorContainQuadTreeNode(QuadTreeNode* node, std::vector<QuadTreeNode*>* container);
+    
+    static bool vectorContainTrjNode(TrjNode* node, std::vector<TrjNode*>* container);
+    
+    static double distanceSqu(TrjNode* trjNode, DbscanClass* dbNode);
+    
+    static double distanceSqu(DbscanClass* dbNode1, DbscanClass* dbNode2);
+    
+    static void expendTrjNodes(std::vector<TrjNode*>* hasOpNodes,std::vector<TrjNode*>* formalTrjNodes, double e, int m);
+    
+    static std::vector<TrjNode*> trjNodeVectorPlus(std::vector<TrjNode*>* vector1, std::vector<TrjNode*>* vector2);
+    
+    static std::list<double> getDistanceSortToUpList(DbscanClass* dbNode, std::vector<TrjNode*>* trjNodeVector);
+    
+    static double getNewE(int dbscanClassId, int trjNodeId, int m, double ee);
+    
+    static int getNewM(int dbscanClassId, int trjNodeId, int m, double ee);
+    
+    static std::map<int, double> getNewME(int dbscanClassId, int trjNodeId, int m, double ee);
     
 };
 

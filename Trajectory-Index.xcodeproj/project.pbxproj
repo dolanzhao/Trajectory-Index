@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3E53D33F1BF25F3700D51A12 /* dbscan_class.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E53D33D1BF25F3700D51A12 /* dbscan_class.cpp */; };
 		3E7487A11BED0D7100F1819A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7487A01BED0D7100F1819A /* main.cpp */; };
 		3E7487AC1BED12BB00F1819A /* quad_tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7487AA1BED12BB00F1819A /* quad_tree.cpp */; };
 		3E7487AF1BED152100F1819A /* trj_node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7487AD1BED152100F1819A /* trj_node.cpp */; };
@@ -26,6 +27,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3E53D33D1BF25F3700D51A12 /* dbscan_class.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dbscan_class.cpp; sourceTree = "<group>"; };
+		3E53D33E1BF25F3700D51A12 /* dbscan_class.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = dbscan_class.hpp; sourceTree = "<group>"; };
 		3E74879D1BED0D7100F1819A /* Trajectory-Index */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Trajectory-Index"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3E7487A01BED0D7100F1819A /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		3E7487A91BED11D500F1819A /* def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = def.h; sourceTree = "<group>"; };
@@ -73,6 +76,8 @@
 				3E7487AB1BED12BB00F1819A /* quad_tree.hpp */,
 				3E7487AD1BED152100F1819A /* trj_node.cpp */,
 				3E7487AE1BED152100F1819A /* trj_node.hpp */,
+				3E53D33D1BF25F3700D51A12 /* dbscan_class.cpp */,
+				3E53D33E1BF25F3700D51A12 /* dbscan_class.hpp */,
 				3E7487B01BED1F2E00F1819A /* util.cpp */,
 				3E7487B11BED1F2E00F1819A /* util.hpp */,
 			);
@@ -138,6 +143,7 @@
 				3E7487AC1BED12BB00F1819A /* quad_tree.cpp in Sources */,
 				3E7487AF1BED152100F1819A /* trj_node.cpp in Sources */,
 				3E7487A11BED0D7100F1819A /* main.cpp in Sources */,
+				3E53D33F1BF25F3700D51A12 /* dbscan_class.cpp in Sources */,
 				3E7487B21BED1F2E00F1819A /* util.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -257,6 +263,7 @@
 				3E7487A61BED0D7100F1819A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

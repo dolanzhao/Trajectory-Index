@@ -14,6 +14,7 @@ QuadTreeNode::QuadTreeNode()
 : _isLeaf(false)
 , _isBeMerge(false)
 , _trjNodeNumber(0)
+, _id(-1)
 {
     
 }
@@ -46,6 +47,8 @@ bool QuadTreeNode::init(double xMin, double yMin, double xMax, double yMax, Quad
     _yMin = yMin;
     _yMax = yMax;
     _belongTree = belongTree;
+    _belongTree->_nodeMaxId++;
+    _id = _belongTree->_nodeMaxId;
     _parentNode = parentNode;
     
     if (parentNode == NULL) {
@@ -194,7 +197,20 @@ void QuadTreeNode::separate()
     _belongTree->_quadTreeNodeCache.insert(_belongTree->_quadTreeNodeCache.end(), _childNodeVector.begin(), _childNodeVector.end());
 }
 
+bool QuadTreeNode::operator==(const QuadTreeNode& operatorNode)
+{
+    if (this->_id == operatorNode._id) {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 QuadTree::QuadTree()
+: _nodeMaxId(0)
 {
     
 }

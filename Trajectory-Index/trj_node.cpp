@@ -16,6 +16,7 @@ TrjNode::TrjNode()
 , _id(0)
 , _isInitSuccess(false)
 , _belongQuadTreeNode(NULL)
+, _belongDbscanClass(NULL)
 {
     
 }
@@ -24,7 +25,7 @@ TrjNode::~TrjNode()
 {
     if(_isInitSuccess)
     {
-        printf("销毁轨迹点 ID:%d X:%lf Y:%lf \n", _id, _x, _y); //for debug
+//        printf("销毁轨迹点 ID:%d X:%lf Y:%lf \n", _id, _x, _y); //for debug
     }
 }
 
@@ -58,21 +59,21 @@ bool TrjNode::init(std::string nodeTextData)
     std::vector<std::string> splitResult = Util::split(nodeTextData, NodeInternalDateSep);
     if(splitResult.size() != 3)
     {
-        printf("销毁数据有误，数据缺失");
+        printf("销毁数据有误，数据缺失");//for debug
         _isInitSuccess = false;
         return false;
     }
     _id = Util::stringToInt(splitResult[0]);
     if(_id < NODE_ID_MIN)
     {
-        printf("销毁数据有误，id越界");
+        printf("销毁数据有误，id越界");//for debug
         _isInitSuccess = false;
         return false;
     }
     _x = Util::stringToInt(splitResult[1]);
     if(_x <= NODE_X_MIN && _x >= NODE_X_MAX)
     {
-        printf("销毁数据有误，数据点x坐标越界");
+        printf("销毁数据有误，数据点x坐标越界");//for debug
         _isInitSuccess = false;
         return false;
     }
@@ -80,7 +81,7 @@ bool TrjNode::init(std::string nodeTextData)
     _y = Util::stringToInt(splitResult[2]);
     if(_y <= NODE_Y_MIN && _y>= NODE_Y_MAX)
     {
-        printf("销毁数据有误，数据点y坐标越界");
+        printf("销毁数据有误，数据点y坐标越界");//for debug
         _isInitSuccess = false;
         return false;
     }
@@ -89,43 +90,77 @@ bool TrjNode::init(std::string nodeTextData)
     return true;
 }
 
-
-static TrjNodeManage* _instance = NULL;
-
-TrjNodeManage* TrjNodeManage::instance(std::string textData)
+bool TrjNode::operator==(const TrjNode& operatorNode)
 {
-    if(_instance == NULL)
-    {
-        _instance = new TrjNodeManage();
-        _instance->init(textData);
+    if (_id == operatorNode._id) {
+        return true;
     }
-    return _instance;
+    else
+    {
+        return false;
+    }
+}
+
+
+
+
+
+static TrjNodeManage* _trjNodeManageInstance = NULL;
+
+TrjNodeManage* TrjNodeManage::instance()
+{
+    if(_trjNodeManageInstance == NULL)
+    {
+        _trjNodeManageInstance = new TrjNodeManage();
+    }
+    return _trjNodeManageInstance;
 }
 
 void TrjNodeManage::purgeInstance()
 {
-    delete _instance;
-    _instance = NULL;
+    delete _trjNodeManageInstance;
+    _trjNodeManageInstance = NULL;
 }
 
 TrjNodeManage::TrjNodeManage()
+: _maxId(-1)
+, _minId(-1)
+, _quadTree(NULL)
+, _time(-1)
 {
     
 }
 
 TrjNodeManage::~TrjNodeManage()
 {
-    delete _quadTree;
+    if(_quadTree)
+    {
+        delete _quadTree;
+    }
     std::map<int, TrjNode*>::iterator it = _nodeMap.begin();
     for (; it != _nodeMap.end(); it++) {
         delete it->second;
     }
+    
+    _nodeMap.clear();
 }
 
-void TrjNodeManage::init(std::string textData)
+void TrjNodeManage::updateNode(std::string textData)
 {
+    
+    if(_quadTree)
+    {
+        delete _quadTree;
+        _quadTree = NULL;
+    }
+    std::map<int, TrjNode*>::iterator nodeIt = _nodeMap.begin();
+    for (; nodeIt != _nodeMap.end(); nodeIt++) {
+        delete nodeIt->second;
+    }
+    
     double xMax = 0, xMin = 0, yMax = 0, yMin = 0;
     std::vector<std::string> splitResult = Util::split(textData, NodeDateSep);
+    _time = Util::stringToInt(splitResult[0]);
     std::vector<std::string>::iterator it = splitResult.begin();
     for(it++; it != splitResult.end(); it++) {
         TrjNode* tempTrjNode = TrjNode::create(*it);
@@ -134,7 +169,14 @@ void TrjNodeManage::init(std::string textData)
             xMin = xMin < tempTrjNode->getTrjNodeX() ? xMin : tempTrjNode->getTrjNodeX();
             yMax = yMax > tempTrjNode->getTrjNodeY() ? yMax : tempTrjNode->getTrjNodeY();
             yMin = yMin < tempTrjNode->getTrjNodeY() ? yMin : tempTrjNode->getTrjNodeY();
-            _nodeMap.insert(std::map<int, TrjNode*>::value_type(tempTrjNode->getTrjNodeId(), tempTrjNode));
+            int tempId = tempTrjNode->getTrjNodeId();
+            if (_maxId < tempId) {
+                _maxId = tempId;
+            }
+            if (_minId > tempId) {
+                _minId = tempId;
+            }
+            _nodeMap.insert(std::map<int, TrjNode*>::value_type(tempId, tempTrjNode));
         }
     }
     _quadTree = new QuadTree();
@@ -173,6 +215,21 @@ void TrjNodeManage::printCellNode()
 std::vector<TrjNode*> TrjNodeManage::getCoverTrj(int id, double r)
 {
     return Util::getCoverTrj(_nodeMap[id], *(_quadTree->_quadTreeNodeCache.begin()), r);
+}
+
+std::vector<TrjNode*> TrjNodeManage::getCoverTrj(TrjNode* trjNode, double r)
+{
+    return Util::getCoverTrj(trjNode, *(_quadTree->_quadTreeNodeCache.begin()), r);
+}
+
+std::vector<TrjNode*> TrjNodeManage::getCoverTrjByRR(int id, double rr)
+{
+    return Util::getCoverTrjByRR(_nodeMap[id], *(_quadTree->_quadTreeNodeCache.begin()), rr);
+}
+
+std::vector<TrjNode*> TrjNodeManage::getCoverTrjByRR(TrjNode* trjNode, double rr)
+{
+    return Util::getCoverTrjByRR(trjNode, *(_quadTree->_quadTreeNodeCache.begin()), rr);
 }
 
 int TrjNodeManage::getPreciseNumber(int id, double r)

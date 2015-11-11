@@ -14,11 +14,13 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <list>
 
 #define NodeDateSep "|"
 #define NodeInternalDateSep ";"
 
 const int NODE_ID_MIN = 0;
+const int CLASS_ID_MIN = -1;
 const double NODE_X_MIN = -10000.0;
 const double NODE_X_MAX = 10000.0;
 const double NODE_Y_MIN = -10000.0;

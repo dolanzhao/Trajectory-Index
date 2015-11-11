@@ -9,7 +9,6 @@
 #ifndef quad_tree_hpp
 #define quad_tree_hpp
 
-#include <stdio.h>
 #include "def.h"
 
 class TrjNode;
@@ -29,6 +28,8 @@ public:
     void mergeWithNextNerborNode(QuadTreeNode* nerborNode);
     
     void separate();
+    
+    bool operator==(const QuadTreeNode & operatorNode);
     
 private:
     
@@ -61,6 +62,8 @@ public:
     bool _isLeaf;
     
     bool _isBeMerge;
+    
+    int _id;
 };
 
 
@@ -75,6 +78,8 @@ public:
 private:
     
 public:
+    
+    int _nodeMaxId;
     
     std::vector<QuadTreeNode*> _quadTreeNodeCache;
 };
