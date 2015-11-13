@@ -12,6 +12,7 @@
 		3E7487AC1BED12BB00F1819A /* quad_tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7487AA1BED12BB00F1819A /* quad_tree.cpp */; };
 		3E7487AF1BED152100F1819A /* trj_node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7487AD1BED152100F1819A /* trj_node.cpp */; };
 		3E7487B21BED1F2E00F1819A /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7487B01BED1F2E00F1819A /* util.cpp */; };
+		3ED87A5D1BF5D90700A0ED9C /* dbscan_whynot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3ED87A5B1BF5D90700A0ED9C /* dbscan_whynot.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -38,6 +39,8 @@
 		3E7487AE1BED152100F1819A /* trj_node.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; lineEnding = 0; path = trj_node.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		3E7487B01BED1F2E00F1819A /* util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = util.cpp; sourceTree = "<group>"; };
 		3E7487B11BED1F2E00F1819A /* util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = util.hpp; sourceTree = "<group>"; };
+		3ED87A5B1BF5D90700A0ED9C /* dbscan_whynot.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dbscan_whynot.cpp; sourceTree = "<group>"; };
+		3ED87A5C1BF5D90700A0ED9C /* dbscan_whynot.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = dbscan_whynot.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +83,8 @@
 				3E53D33E1BF25F3700D51A12 /* dbscan_class.hpp */,
 				3E7487B01BED1F2E00F1819A /* util.cpp */,
 				3E7487B11BED1F2E00F1819A /* util.hpp */,
+				3ED87A5B1BF5D90700A0ED9C /* dbscan_whynot.cpp */,
+				3ED87A5C1BF5D90700A0ED9C /* dbscan_whynot.hpp */,
 			);
 			path = "Trajectory-Index";
 			sourceTree = "<group>";
@@ -145,6 +150,7 @@
 				3E7487A11BED0D7100F1819A /* main.cpp in Sources */,
 				3E53D33F1BF25F3700D51A12 /* dbscan_class.cpp in Sources */,
 				3E7487B21BED1F2E00F1819A /* util.cpp in Sources */,
+				3ED87A5D1BF5D90700A0ED9C /* dbscan_whynot.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

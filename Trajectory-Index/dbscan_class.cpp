@@ -10,6 +10,7 @@
 #include "util.hpp"
 #include "trj_node.hpp"
 #include "quad_tree.hpp"
+#include "dbscan_whynot.hpp"
 
 DbscanClass::DbscanClass()
 : _id(-1)
@@ -56,14 +57,14 @@ bool DbscanClass::init(std::string data)
     std::vector<std::string>::iterator it = splitResult.begin();
     for (it ++ ; it != splitResult.end(); it ++) {
         int nodeId = Util::stringToInt(*it);
-        if (nodeId > TRJNODEMANAGE->_maxId || nodeId < TRJNODEMANAGE->_minId) {
+        if (nodeId > DBSCANWHYNOT->_trjNodeManageMap[_id]->_maxId || nodeId < DBSCANWHYNOT->_trjNodeManageMap[_id]->_minId) {
             printf("销毁数据有误，class:%d 中 node id:%d 越界", _id, nodeId);//for debug
             _isInitSuccess = false;
             return false;
         }
         else
         {
-            this->addNode(TRJNODEMANAGE->_nodeMap[nodeId]);
+            this->addNode(DBSCANWHYNOT->_trjNodeManageMap[_id]->_nodeMap[nodeId]);
         }
     }
     printf("创建簇，class:%d\n", _id);//for debug
@@ -98,28 +99,15 @@ void DbscanClass::addNode(TrjNode* node)
 
 
 
-static DbscanClassManage* _dbScanManageInstance = NULL;
-
-DbscanClassManage* DbscanClassManage::instance()
+DbscanClassManage* DbscanClassManage::create(std::string textData)
 {
-    if(_dbScanManageInstance == NULL)
-    {
-        _dbScanManageInstance = new DbscanClassManage();
-    }
-    return _dbScanManageInstance;
-}
-
-void DbscanClassManage::purgeInstance()
-{
-    delete _dbScanManageInstance;
-    _dbScanManageInstance = NULL;
+    DbscanClassManage* dbScanManage = new DbscanClassManage();
+    dbScanManage->init(textData);
+    return dbScanManage;
 }
 
 DbscanClassManage::DbscanClassManage()
 : _time(-1)
-, _k(0)
-, _m(0)
-, _e(0)
 {
     
 }
@@ -133,7 +121,7 @@ DbscanClassManage::~DbscanClassManage()
     _dbscanClassMap.clear();
 }
 
-void DbscanClassManage::updateClass(std::string textData)
+void DbscanClassManage::init(std::string textData)
 {
     std::map<int, DbscanClass*>::iterator dbscanIt = _dbscanClassMap.begin();
     for (; dbscanIt != _dbscanClassMap.end(); dbscanIt++) {

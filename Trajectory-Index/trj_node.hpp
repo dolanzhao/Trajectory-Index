@@ -11,11 +11,10 @@
 
 #include "def.h"
 
-#define TRJNODEMANAGE TrjNodeManage::instance()
-
 class QuadTree;
 class QuadTreeNode;
 class DbscanClass;
+class TrjNodeManage;
 class TrjNode
 {
 public:
@@ -52,17 +51,18 @@ public:
     
     DbscanClass* _belongDbscanClass;
     
+    TrjNodeManage* _belongTrjNodeManage;
 };
 
 class TrjNodeManage
 {
 public:
     
-    static TrjNodeManage* instance();
+    TrjNodeManage();
     
-    static void purgeInstance();
+    ~TrjNodeManage();
     
-    void updateNode(std::string textData);
+    static TrjNodeManage* create(std::string nodeTextData);
     
     void printCellNode();
     
@@ -80,9 +80,7 @@ public:
     
 private:
     
-    TrjNodeManage();
-    
-    ~TrjNodeManage();
+    void init(std::string textData);
     
 protected:
     

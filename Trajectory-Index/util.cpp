@@ -12,6 +12,7 @@
 #include "trj_node.hpp"
 #include "quad_tree.hpp"
 #include "dbscan_class.hpp"
+#include "dbscan_whynot.hpp"
 
 std::vector<std::string> Util::split(const  std::string& s, const std::string& delim)
 {
@@ -200,21 +201,24 @@ bool Util::vectorContainTrjNode(TrjNode* node, std::vector<TrjNode*>* container)
 double Util::distanceSqu(TrjNode* trjNode, DbscanClass* dbNode)
 {
     double result = (NODE_X_MAX - NODE_X_MIN) * (NODE_X_MAX - NODE_X_MIN);
-//    std::vector<QuadTreeNode*> tempQtNode = dbNode->_containQuadTreeNode;
+    std::vector<QuadTreeNode*> tempQtNode = dbNode->_containQuadTreeNode;
     std::vector<TrjNode*> tempTrjNode = dbNode->_containNodes;
-    std::vector<TrjNode*>::iterator tempIt = tempTrjNode.begin();
-    for (; tempIt != tempTrjNode.end(); tempIt++) {
-//        if (Util::minDistanceSqu(trjNode, *tempIt) >= result) {
-//            continue;
-//        }
-//        std::vector<TrjNode*> tempTrjNode = dbNode->getTrjNodeBelongQuadTreeNode(*tempIt);
-//        std::vector<TrjNode*>::iterator tempInIt = tempTrjNode.begin();
-//        for (; tempInIt != tempTrjNode.end(); tempInIt++) {
-            double tempDis = Util::distanceSqu(trjNode, *tempIt);
-            if (result > tempDis) {
-                result = tempDis;
+    std::vector<QuadTreeNode*>::iterator tempIt = tempQtNode.begin();
+    for (; tempIt != tempQtNode.end(); tempIt++) {
+        if (Util::minDistanceSqu(trjNode, *tempIt) >= result) {
+            continue;
+        }
+        std::vector<TrjNode*> tempTrjNode = dbNode->getTrjNodeBelongQuadTreeNode(*tempIt);
+        std::vector<TrjNode*>::iterator tempInIt = tempTrjNode.begin();
+        for (; tempInIt != tempTrjNode.end(); tempInIt++) {
+            double tempDis = Util::distanceSqu(trjNode, *tempInIt);
+            if(trjNode->_belongTrjNodeManage->getCoverTrjByRR(*tempInIt, tempDis).size() >= DBSCANWHYNOT->_m)
+            {
+                if (result > tempDis) {
+                    result = tempDis;
+                }
             }
-//        }
+        }
     }
     
     return result;
@@ -263,12 +267,12 @@ std::vector<TrjNode*> Util::trjNodeVectorPlus(std::vector<TrjNode*>* vector1, st
     return result;
 }
 
-double Util::getNewE(int dbscanClassId, int trjNodeId, int m, double ee)
+double Util::getNewE(int t, int dbscanClassId, int trjNodeId, int m, double ee)
 {
-    DbscanClass* dbNode = DBSCANCLASSMANAGE->_dbscanClassMap[dbscanClassId];
-    TrjNode* trjNode = TRJNODEMANAGE->_nodeMap[trjNodeId];
+    DbscanClass* dbNode = DBSCANWHYNOT->_dbscanClassManageMap[t]->_dbscanClassMap[dbscanClassId];
+    TrjNode* trjNode = DBSCANWHYNOT->_trjNodeManageMap[t]->_nodeMap[trjNodeId];
     double result = Util::distanceSqu(trjNode, dbNode);
-    if (result < ee) {
+    if (result <= ee) {
         return ee;
     }
     std::vector<TrjNode*> formalTrjNodes = dbNode->_containNodes;
@@ -294,11 +298,11 @@ double Util::getNewE(int dbscanClassId, int trjNodeId, int m, double ee)
     return result;
 }
 
-int Util::getNewM(int dbscanClassId, int trjNodeId, int m, double ee)
+int Util::getNewM(int t, int dbscanClassId, int trjNodeId, int m, double ee)
 {
     int result = 1;
-    DbscanClass* dbNode = DBSCANCLASSMANAGE->_dbscanClassMap[dbscanClassId];
-    TrjNode* trjNode = TRJNODEMANAGE->_nodeMap[trjNodeId];
+    DbscanClass* dbNode = DBSCANWHYNOT->_dbscanClassManageMap[t]->_dbscanClassMap[dbscanClassId];
+    TrjNode* trjNode = DBSCANWHYNOT->_trjNodeManageMap[t]->_nodeMap[trjNodeId];
     
     for(int i = m; i >= 2; i--)
     {
@@ -313,11 +317,11 @@ int Util::getNewM(int dbscanClassId, int trjNodeId, int m, double ee)
     return result;
 }
 
-std::map<int, double> Util::getNewME(int dbscanClassId, int trjNodeId, int m, double ee)
+std::map<int, double> Util::getNewME(int t, int dbscanClassId, int trjNodeId, int m, double ee)
 {
     std::map<int, double> result;
-    DbscanClass* dbNode = DBSCANCLASSMANAGE->_dbscanClassMap[dbscanClassId];
-    TrjNode* trjNode = TRJNODEMANAGE->_nodeMap[trjNodeId];
+    DbscanClass* dbNode = DBSCANWHYNOT->_dbscanClassManageMap[t]->_dbscanClassMap[dbscanClassId];
+    TrjNode* trjNode = DBSCANWHYNOT->_trjNodeManageMap[t]->_nodeMap[trjNodeId];
     double up = Util::distanceSqu(trjNode, dbNode);
     for (int i = m; i > 1; i--) {
         std::vector<TrjNode*> formalTrjNodes = dbNode->_containNodes;
@@ -346,7 +350,108 @@ std::map<int, double> Util::getNewME(int dbscanClassId, int trjNodeId, int m, do
     return result;
 }
 
+ResultType Util::getMinE(int dbscanClassId, int trjNodeId)
+{
+    ResultType result;
+    std::map<int, double> minEMap;
+    
+    std::map<int,TrjNodeManage*>::iterator it = DBSCANWHYNOT->_trjNodeManageMap.begin();
+    for (; it != DBSCANWHYNOT->_trjNodeManageMap.end(); it++) {
+        minEMap.insert(std::map<int, double>::value_type(it->first, Util::getNewE(it->first, dbscanClassId, trjNodeId, DBSCANWHYNOT->_m, DBSCANWHYNOT->_e * DBSCANWHYNOT->_e)));
+    }
+    
+    result._m = DBSCANWHYNOT->_m;
+    std::map<int, double>::iterator it2 = minEMap.begin();
+    std::list<std::map<int, double>::iterator> tempList;
+    double minE = DBSCANWHYNOT->_e;
+    int startTime = 0, endTime = 0;
+    for (; it2 != minEMap.end(); it2++) {
+        std::map<int, double>::iterator it3 = it2;
+        if((it2->first - (--it3)->first) > 1) {
+            tempList.clear();
+        }
+        if (tempList.size() < DBSCANWHYNOT->_k) {
+            tempList.push_back(it2);
+        }
+        else
+        {
+            tempList.pop_front();
+            tempList.push_back(it2);
+            double tempMax = DBSCANWHYNOT->_e;
+            std::list<std::map<int, double>::iterator>::iterator it3 = tempList.begin();
+            for (; it3 != tempList.end(); it3++) {
+                if ((*it3)->second > tempMax) {
+                    tempMax = (*it3)->second;
+                }
+            }
+            if(minE > tempMax)
+            {
+                startTime = tempList.front()->first;
+                endTime = tempList.back()->first;
+                minE = tempMax;
+            }
+        }
+    }
+    result._e = minE;
+    result._startTime = startTime;
+    result._endTime = endTime;
+    
+    return result;
+}
 
+ResultType Util::getMinM(int dbscanClassId, int trjNodeId)
+{
+    ResultType result;
+    std::map<int, int> minMMap;
+    
+    std::map<int,TrjNodeManage*>::iterator it = DBSCANWHYNOT->_trjNodeManageMap.begin();
+    for (; it != DBSCANWHYNOT->_trjNodeManageMap.end(); it++) {
+        minMMap.insert(std::map<int, int>::value_type(it->first, Util::getNewM(it->first, dbscanClassId, trjNodeId, DBSCANWHYNOT->_m, DBSCANWHYNOT->_e * DBSCANWHYNOT->_e)));
+    }
+    
+    result._e = DBSCANWHYNOT->_e;
+    std::map<int, int>::iterator it2 = minMMap.begin();
+    std::list<std::map<int, int>::iterator> tempList;
+    int maxM = DBSCANWHYNOT->_m;
+    int startTime = 0, endTime = 0;
+    for (; it2 != minMMap.end(); it2++) {
+        std::map<int, int>::iterator it3 = it2;
+        if((it2->first - (--it3)->first) > 1) {
+            tempList.clear();
+        }
+        if(it2->second)
+        {
+            tempList.clear();
+            continue;
+        }
+        if (tempList.size() < DBSCANWHYNOT->_k) {
+            tempList.push_back(it2);
+        }
+        else
+        {
+            tempList.pop_front();
+            tempList.push_back(it2);
+            int tempMin = DBSCANWHYNOT->_m;
+            std::list<std::map<int, int>::iterator>::iterator it3 = tempList.begin();
+            for (; it3 != tempList.end(); it3++) {
+                if ((*it3)->second < tempMin) {
+                    tempMin = (*it3)->second;
+                }
+            }
+            if(maxM < tempMin)
+            {
+                startTime = tempList.front()->first;
+                endTime = tempList.back()->first;
+                maxM = tempMin;
+            }
+        }
+    }
+    result._m = maxM;
+    result._startTime = startTime;
+    result._endTime = endTime;
+    
+    return result;
+}
 
 void Util::expendTrjNodes(std::vector<TrjNode*>* ignoreNode, std::vector<TrjNode*>* formalTrjNodes, double ee, int m)
 {
@@ -355,7 +460,7 @@ void Util::expendTrjNodes(std::vector<TrjNode*>* ignoreNode, std::vector<TrjNode
         
         if (!Util::vectorContainTrjNode((*formalTrjNodes)[i], ignoreNode)) {
             ignoreNode->push_back((*formalTrjNodes)[i]);
-            std::vector<TrjNode*> temp = TRJNODEMANAGE->getCoverTrjByRR((*formalTrjNodes)[i], ee);
+            std::vector<TrjNode*> temp = (*formalTrjNodes)[i]->_belongTrjNodeManage->getCoverTrjByRR((*formalTrjNodes)[i], ee);
             if (temp.size() >= m) {
                 std::vector<TrjNode*>::iterator it2 = temp.begin();
                 for (; it2 != temp.end(); it2++) {

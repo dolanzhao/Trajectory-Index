@@ -11,8 +11,6 @@
 
 #include "def.h"
 
-#define DBSCANCLASSMANAGE DbscanClassManage::instance()
-
 class TrjNode;
 class QuadTreeNode;
 class DbscanClass
@@ -53,27 +51,19 @@ class DbscanClassManage
 {
 public:
     
-    static DbscanClassManage* instance();
-    
-    static void purgeInstance();
-    
-    void updateClass(std::string textData);
-    
-private:
+    static DbscanClassManage* create(std::string textData);
     
     DbscanClassManage();
     
     ~DbscanClassManage();
     
+private:
+    
+    void init(std::string textData);
+    
 public:
     
     int _time;
-    
-    int _k;
-    
-    double _e;
-    
-    int _m;
     
     std::map<int, DbscanClass*> _dbscanClassMap;
     

@@ -29,5 +29,12 @@ const double NODE_Y_MAX = 10000.0;
 const double CELL_NODE_MAX = 2;
 //const double CELL_NODE_MIN = 1;
 
+typedef struct{
+    int _startTime;
+    int _endTime;
+    int _m;
+    double _e;
+} ResultType;
+
 
 #endif /* def_h */

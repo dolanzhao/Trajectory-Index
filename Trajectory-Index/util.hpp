@@ -55,11 +55,15 @@ public:
     
     static std::list<double> getDistanceSortToUpList(DbscanClass* dbNode, std::vector<TrjNode*>* trjNodeVector);
     
-    static double getNewE(int dbscanClassId, int trjNodeId, int m, double ee);
+    static double getNewE(int t, int dbscanClassId, int trjNodeId, int m, double ee);
     
-    static int getNewM(int dbscanClassId, int trjNodeId, int m, double ee);
+    static int getNewM(int t, int dbscanClassId, int trjNodeId, int m, double ee);
     
-    static std::map<int, double> getNewME(int dbscanClassId, int trjNodeId, int m, double ee);
+    static std::map<int, double> getNewME(int t, int dbscanClassId, int trjNodeId, int m, double ee);
+    
+    static ResultType getMinE(int dbscanClassId, int trjNodeId);
+    
+    static ResultType getMinM(int dbscanClassId, int trjNodeId);
     
 };
 

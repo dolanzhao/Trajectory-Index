@@ -9,6 +9,7 @@
 #include "trj_node.hpp"
 #include "util.hpp"
 #include "quad_tree.hpp"
+#include "dbscan_whynot.hpp"
 
 TrjNode::TrjNode()
 : _x(0.0)
@@ -105,21 +106,12 @@ bool TrjNode::operator==(const TrjNode& operatorNode)
 
 
 
-static TrjNodeManage* _trjNodeManageInstance = NULL;
 
-TrjNodeManage* TrjNodeManage::instance()
+TrjNodeManage* TrjNodeManage::create(std::string testDate)
 {
-    if(_trjNodeManageInstance == NULL)
-    {
-        _trjNodeManageInstance = new TrjNodeManage();
-    }
-    return _trjNodeManageInstance;
-}
-
-void TrjNodeManage::purgeInstance()
-{
-    delete _trjNodeManageInstance;
-    _trjNodeManageInstance = NULL;
+    TrjNodeManage* trjNodeManage = new TrjNodeManage();
+    trjNodeManage->init(testDate);
+    return trjNodeManage;
 }
 
 TrjNodeManage::TrjNodeManage()
@@ -145,7 +137,7 @@ TrjNodeManage::~TrjNodeManage()
     _nodeMap.clear();
 }
 
-void TrjNodeManage::updateNode(std::string textData)
+void TrjNodeManage::init(std::string textData)
 {
     
     if(_quadTree)
@@ -177,6 +169,7 @@ void TrjNodeManage::updateNode(std::string textData)
                 _minId = tempId;
             }
             _nodeMap.insert(std::map<int, TrjNode*>::value_type(tempId, tempTrjNode));
+            tempTrjNode->_belongTrjNodeManage = this;
         }
     }
     _quadTree = new QuadTree();
