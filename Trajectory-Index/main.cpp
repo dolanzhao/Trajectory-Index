@@ -59,7 +59,7 @@ int main(int argc, const char * argv[]) {
             resultTypeVector.insert(resultTypeVector.end(),temp.begin(),temp.end());
             resultTypeVector.push_back(Util::getMinK(tarTrjVector));
             
-            Util::writeFile(FileLocal"" + DataSetStr[i] + "/" + outArgv[0] + "/whyNotResult.txt", resultTypeVector);
+            Util::writeFile(FileLocal"" + DataSetStr[i] + "/" + outArgv[0] + "whyNotResult.txt", resultTypeVector);
             
             printf("finish min data set <%s:%s> \n", DataSetStr[i].c_str(), outArgv[0].c_str());
         }

@@ -290,7 +290,7 @@ double Util::getNewE(int t, int dbscanClassId, int trjNodeId, int m, double ee)
     for (; it != resultList.end(); it++) {
         if (*it < result) {
             ignoreNode.clear();
-            if (trjNode->_belongDbscanClass->_id == -1 && trjNode->_belongTrjNodeManage->getCoverTrj(trjNode, *it).size() < m) {
+            if (trjNode->_belongDbscanClass->getId() == -1 && trjNode->_belongTrjNodeManage->getCoverTrj(trjNode, *it).size() < m) {
                 break;
             }
             std::vector<TrjNode*> tempTrjNodes = dbNode->_containNodes;
@@ -385,6 +385,21 @@ ResultType Util::getMinE()
         }
         if (tempList.size() < DBSCANWHYNOT->_k) {
             tempList.push_back(it2);
+            if (tempList.size() ==  DBSCANWHYNOT->_k) {
+                double tempMax = DBSCANWHYNOT->_e;
+                std::list<std::map<int, double>::iterator>::iterator it3 = tempList.begin();
+                for (; it3 != tempList.end(); it3++) {
+                    if ((*it3)->second > tempMax) {
+                        tempMax = (*it3)->second;
+                    }
+                }
+                if(minE > tempMax)
+                {
+                    startTime = tempList.front()->first;
+                    endTime = tempList.back()->first;
+                    minE = tempMax;
+                }
+            }
         }
         else
         {
@@ -423,7 +438,11 @@ ResultType Util::getMinM()
     
     std::map<int,int>::iterator it = DBSCANWHYNOT->_timeTargetMap.begin();
     for (; it != DBSCANWHYNOT->_timeTargetMap.end(); it++) {
-        minMMap.insert(std::map<int, int>::value_type(it->first, Util::getNewM(it->first, it->second, DBSCANWHYNOT->_misId, DBSCANWHYNOT->_m, DBSCANWHYNOT->_e * DBSCANWHYNOT->_e)));
+        int result = Util::getNewM(it->first, it->second, DBSCANWHYNOT->_misId, DBSCANWHYNOT->_m, DBSCANWHYNOT->_e * DBSCANWHYNOT->_e);
+        if (result > 1) {
+            minMMap.insert(std::map<int, int>::value_type(it->first, result));
+        }
+        
     }
     result._e = DBSCANWHYNOT->_e;
     result._k = DBSCANWHYNOT->_k;
@@ -437,13 +456,21 @@ ResultType Util::getMinM()
         if( it2 != minMMap.begin() && (it2->first - (--it3)->first) > 1) {
             tempList.clear();
         }
-        if(it2->second)
-        {
-            tempList.clear();
-            continue;
-        }
         if (tempList.size() < DBSCANWHYNOT->_k) {
             tempList.push_back(it2);
+            int tempMin = DBSCANWHYNOT->_m;
+            std::list<std::map<int, int>::iterator>::iterator it3 = tempList.begin();
+            for (; it3 != tempList.end(); it3++) {
+                if ((*it3)->second < tempMin) {
+                    tempMin = (*it3)->second;
+                }
+            }
+            if(maxM < tempMin)
+            {
+                startTime = tempList.front()->first;
+                endTime = tempList.back()->first;
+                maxM = tempMin;
+            }
         }
         else
         {
@@ -502,6 +529,21 @@ std::vector<ResultType> Util::getMinME()
             }
             if (tempList.size() < DBSCANWHYNOT->_k) {
                 tempList.push_back(it2);
+                if (tempList.size() ==  DBSCANWHYNOT->_k) {
+                    double tempMax = DBSCANWHYNOT->_e;
+                    std::list<std::map<int, double>::iterator>::iterator it3 = tempList.begin();
+                    for (; it3 != tempList.end(); it3++) {
+                        if ((*it3)->second > tempMax) {
+                            tempMax = (*it3)->second;
+                        }
+                    }
+                    if(minE > tempMax)
+                    {
+                        startTime = tempList.front()->first;
+                        endTime = tempList.back()->first;
+                        minE = tempMax;
+                    }
+                }
             }
             else
             {
@@ -537,10 +579,26 @@ std::vector<ResultType> Util::getMinME()
 bool Util::isInOneClass(std::vector<int>* trjVector, TrjNodeManage* trjNodeManage)
 {
     std::vector<int>::iterator it = (*trjVector).begin();
-    int classId = trjNodeManage->_nodeMap[*(it)]->_belongDbscanClass->_id;
+    if(trjNodeManage->_nodeMap[*(it)] == NULL)
+    {
+        return false;
+    }
+    int classId = trjNodeManage->_nodeMap[*(it)]->_belongDbscanClass->getId();
+    if (classId == -1)
+    {
+        return false;
+    }
     for (it ++ ; it != (*trjVector).end(); it ++) {
-        int tempClassId = trjNodeManage->_nodeMap[*(it)]->_belongDbscanClass->_id;
-        if (classId != tempClassId) {
+        if(trjNodeManage->_nodeMap[*(it)] != NULL)
+        {
+            int tempClassId = trjNodeManage->_nodeMap[*(it)]->_belongDbscanClass->getId();
+            if (classId != tempClassId) {
+                return false;
+            }
+
+        }
+        else
+        {
             return false;
         }
     }
@@ -549,6 +607,11 @@ bool Util::isInOneClass(std::vector<int>* trjVector, TrjNodeManage* trjNodeManag
 
 ResultType Util::getMinK(std::vector<int> trjVector)
 {
+    std::vector<int>::iterator trjVectorIt = trjVector.begin();
+    for (; trjVectorIt != trjVector.end(); trjVectorIt++) {
+        printf(" %d", *trjVectorIt);
+    }
+    printf("\n");
     ResultType result;
     result._e = DBSCANWHYNOT->_e;
     result._m = DBSCANWHYNOT->_m;
@@ -556,8 +619,10 @@ ResultType Util::getMinK(std::vector<int> trjVector)
     clock_t t_start,t_end;
     t_start = clock();
     std::vector<int> contain;
-    std::map<int,TrjNodeManage*>::iterator it = DBSCANWHYNOT->_trjNodeManageMap.begin();
-    for (; it != DBSCANWHYNOT->_trjNodeManageMap.end(); it++) {
+    std::map<int,TrjNodeManage*>* trjNodeManageMap = &DBSCANWHYNOT->_trjNodeManageMap;
+    std::map<int,TrjNodeManage*>::iterator it = (*trjNodeManageMap).begin();
+    std::map<int,DbscanClassManage*>::iterator it2 = DBSCANWHYNOT->_dbscanClassManageMap.begin();
+    for (; it2 != DBSCANWHYNOT->_dbscanClassManageMap.end(); it2++, it++) {
         if (Util::isInOneClass(&trjVector, it->second)) {
             contain.push_back(it->first);
         }
@@ -588,7 +653,7 @@ ResultType Util::getMinK(std::vector<int> trjVector)
         }
     }
     
-    result._m = k;
+    result._k = k;
     result._startTime = start;
     result._endTime = end;
     t_end = clock();

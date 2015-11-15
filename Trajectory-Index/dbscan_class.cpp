@@ -86,6 +86,11 @@ std::vector<TrjNode*> DbscanClass::getTrjNodeBelongQuadTreeNode(QuadTreeNode* no
     return result;
 }
 
+int DbscanClass::getId()
+{
+    return _id;
+}
+
 void DbscanClass::addNode(TrjNode* node)
 {
     _containNodes.push_back(node);
@@ -131,7 +136,7 @@ void DbscanClassManage::init(std::string textData)
         if (std::strcmp("", (*it).c_str()) != 0) {
             DbscanClass* dbscanClass = DbscanClass::create(*it, _time);
             if (dbscanClass) {
-                _dbscanClassMap.insert(std::map<int, DbscanClass*>::value_type(dbscanClass->_id, dbscanClass));
+                _dbscanClassMap.insert(std::map<int, DbscanClass*>::value_type(dbscanClass->getId(), dbscanClass));
             }
         }
     }

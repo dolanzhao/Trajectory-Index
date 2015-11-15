@@ -37,15 +37,15 @@ private:
     
     bool init(std::string nodeTextData);
     
-public:
-    
-    bool _isInitSuccess;
-    
     int _id;
     
     double _x;
     
     double _y;
+    
+    bool _isInitSuccess;
+    
+public:
     
     QuadTreeNode* _belongQuadTreeNode;
     

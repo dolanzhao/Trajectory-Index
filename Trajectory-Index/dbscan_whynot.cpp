@@ -97,7 +97,7 @@ void DbscanWhynot::addTimeTargetSet(int minTime, int maxTime, int targetContainN
     for(int i = minTime; i <= maxTime; i++)
     {
         DbscanClass* tempDbscanClass = DBSCANWHYNOT->_trjNodeManageMap[i]->_nodeMap[targetContainNodeId]->_belongDbscanClass;
-       _timeTargetMap.insert(std::map<int, int>::value_type(i, tempDbscanClass->_id));
+       _timeTargetMap.insert(std::map<int, int>::value_type(i, tempDbscanClass->getId()));
     }
 }
 

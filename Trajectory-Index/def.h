@@ -59,9 +59,10 @@ enum DataSet
 //    BusTrj = 0,
 //    ChameleonTrj,
 //    SyntheticTrj,
-    TdriveTrj,
-    TgpsTrj,
+//    TdriveTrj,
+//    TgpsTrj,
 //    TruckTrj,
+    Test,
     DataSetNumber
 };
 
@@ -70,9 +71,10 @@ const std::string DataSetStr[] =
 //    "bus",
 //    "chameleon",
 //    "synthetic",
-    "tdrive",
-    "tgps",
-//    "truck"
+//    "tdrive",
+//    "tgps",
+//    "truck",
+    "test"
 };
 
 #endif /* def_h */

@@ -25,17 +25,19 @@ public:
     
     std::vector<TrjNode*> getTrjNodeBelongQuadTreeNode(QuadTreeNode* node);
     
+    int getId();
+    
 private:
     
     bool init(std::string data, int time);
     
     void addNode(TrjNode* node);
     
+    int _id;
+    
 public:
     
     bool _isInitSuccess;
-    
-    int _id;
     
     int _trjNodeNumber;
     
