@@ -13,26 +13,32 @@
 #include "quad_tree.hpp"
 #include "dbscan_class.hpp"
 #include "dbscan_whynot.hpp"
+#include <assert.h>
+#include "convoy.hpp"
+#include <boost/algorithm/string.hpp>
+
 
 std::vector<std::string> Util::split(const  std::string& s, const std::string& delim)
 {
     std::vector<std::string> elems;
-    size_t pos = 0;
-    size_t len = s.length();
-    size_t delim_len = delim.length();
-    if (delim_len == 0) return elems;
-    while (pos < len)
-    {
-        int find_pos = (int)s.find(delim, pos);
-        if (find_pos < 0)
-        {
-            elems.push_back(s.substr(pos, len - pos));
-            break;
-        }
-        elems.push_back(s.substr(pos, find_pos - pos));
-        pos = find_pos + delim_len;
-    }
+    boost::split(elems,s,boost::is_any_of(delim.c_str()));
     return elems;
+}
+
+std::string Util::intToString(int num)
+{
+    std::stringstream temp;
+    temp<<num;
+    std::string str = temp.str();
+    return str;
+}
+
+std::string Util::doubleToString(double num)
+{
+    std::stringstream temp;
+    temp<<num;
+    std::string str = temp.str();
+    return str;
 }
 
 int Util::stringToInt(const std::string& str)
@@ -284,6 +290,9 @@ double Util::getNewE(int t, int dbscanClassId, int trjNodeId, int m, double ee)
     for (; it != resultList.end(); it++) {
         if (*it < result) {
             ignoreNode.clear();
+            if (trjNode->_belongDbscanClass->_id == -1 && trjNode->_belongTrjNodeManage->getCoverTrj(trjNode, *it).size() < m) {
+                break;
+            }
             std::vector<TrjNode*> tempTrjNodes = dbNode->_containNodes;
             Util::expendTrjNodes(&ignoreNode, &tempTrjNodes, *it, m);
             if (Util::vectorContainTrjNode(trjNode, &tempTrjNodes)) {
@@ -350,24 +359,28 @@ std::map<int, double> Util::getNewME(int t, int dbscanClassId, int trjNodeId, in
     return result;
 }
 
-ResultType Util::getMinE(int dbscanClassId, int trjNodeId)
+ResultType Util::getMinE()
 {
     ResultType result;
+    clock_t t_start, t_end;
+    t_start = clock() ;
     std::map<int, double> minEMap;
     
-    std::map<int,TrjNodeManage*>::iterator it = DBSCANWHYNOT->_trjNodeManageMap.begin();
-    for (; it != DBSCANWHYNOT->_trjNodeManageMap.end(); it++) {
-        minEMap.insert(std::map<int, double>::value_type(it->first, Util::getNewE(it->first, dbscanClassId, trjNodeId, DBSCANWHYNOT->_m, DBSCANWHYNOT->_e * DBSCANWHYNOT->_e)));
+    std::map<int,int>::iterator it = DBSCANWHYNOT->_timeTargetMap.begin();
+    for (; it != DBSCANWHYNOT->_timeTargetMap.end(); it++) {
+        minEMap.insert(std::map<int, double>::value_type(it->first, Util::getNewE(it->first, it->second, DBSCANWHYNOT->_misId, DBSCANWHYNOT->_m, DBSCANWHYNOT->_e * DBSCANWHYNOT->_e)));
     }
     
     result._m = DBSCANWHYNOT->_m;
+    result._k = DBSCANWHYNOT->_k;
+    result._type = MOE;
     std::map<int, double>::iterator it2 = minEMap.begin();
     std::list<std::map<int, double>::iterator> tempList;
-    double minE = DBSCANWHYNOT->_e;
+    double minE = NODE_X_MAX * NODE_X_MAX;
     int startTime = 0, endTime = 0;
     for (; it2 != minEMap.end(); it2++) {
         std::map<int, double>::iterator it3 = it2;
-        if((it2->first - (--it3)->first) > 1) {
+        if(it2 != minEMap.begin() && (it2->first - (--it3)->first) > 1) {
             tempList.clear();
         }
         if (tempList.size() < DBSCANWHYNOT->_k) {
@@ -392,31 +405,36 @@ ResultType Util::getMinE(int dbscanClassId, int trjNodeId)
             }
         }
     }
-    result._e = minE;
+    result._e = sqrt(minE);
+    t_end = clock();
+    result._time = (double)(t_end-t_start)/CLOCKS_PER_SEC;
     result._startTime = startTime;
     result._endTime = endTime;
     
     return result;
 }
 
-ResultType Util::getMinM(int dbscanClassId, int trjNodeId)
+ResultType Util::getMinM()
 {
+    clock_t t_start, t_end;
+    t_start = clock() ;
     ResultType result;
     std::map<int, int> minMMap;
     
-    std::map<int,TrjNodeManage*>::iterator it = DBSCANWHYNOT->_trjNodeManageMap.begin();
-    for (; it != DBSCANWHYNOT->_trjNodeManageMap.end(); it++) {
-        minMMap.insert(std::map<int, int>::value_type(it->first, Util::getNewM(it->first, dbscanClassId, trjNodeId, DBSCANWHYNOT->_m, DBSCANWHYNOT->_e * DBSCANWHYNOT->_e)));
+    std::map<int,int>::iterator it = DBSCANWHYNOT->_timeTargetMap.begin();
+    for (; it != DBSCANWHYNOT->_timeTargetMap.end(); it++) {
+        minMMap.insert(std::map<int, int>::value_type(it->first, Util::getNewM(it->first, it->second, DBSCANWHYNOT->_misId, DBSCANWHYNOT->_m, DBSCANWHYNOT->_e * DBSCANWHYNOT->_e)));
     }
-    
     result._e = DBSCANWHYNOT->_e;
+    result._k = DBSCANWHYNOT->_k;
+    result._type = MOM;
     std::map<int, int>::iterator it2 = minMMap.begin();
     std::list<std::map<int, int>::iterator> tempList;
-    int maxM = DBSCANWHYNOT->_m;
+    int maxM = 1;
     int startTime = 0, endTime = 0;
     for (; it2 != minMMap.end(); it2++) {
         std::map<int, int>::iterator it3 = it2;
-        if((it2->first - (--it3)->first) > 1) {
+        if( it2 != minMMap.begin() && (it2->first - (--it3)->first) > 1) {
             tempList.clear();
         }
         if(it2->second)
@@ -446,12 +464,139 @@ ResultType Util::getMinM(int dbscanClassId, int trjNodeId)
             }
         }
     }
+    t_end = clock();
+    result._time = (double)(t_end-t_start)/CLOCKS_PER_SEC;
     result._m = maxM;
     result._startTime = startTime;
     result._endTime = endTime;
     
     return result;
 }
+
+std::vector<ResultType> Util::getMinME()
+{
+    std::vector<ResultType> resultVector;
+    
+    for (int m = DBSCANWHYNOT->_m - 1; m > 1; m --) {
+        ResultType result;
+        clock_t t_start,t_end;
+        t_start = clock();
+        std::map<int, double> minEMap;
+        
+        std::map<int,int>::iterator it = DBSCANWHYNOT->_timeTargetMap.begin();
+        for (; it != DBSCANWHYNOT->_timeTargetMap.end(); it++) {
+            minEMap.insert(std::map<int, double>::value_type(it->first, Util::getNewE(it->first, it->second, DBSCANWHYNOT->_misId, m, DBSCANWHYNOT->_e * DBSCANWHYNOT->_e)));
+        }
+        
+        result._m = m;
+        result._k = DBSCANWHYNOT->_k;
+        result._type = MOME;
+        std::map<int, double>::iterator it2 = minEMap.begin();
+        std::list<std::map<int, double>::iterator> tempList;
+        double minE = NODE_X_MAX * NODE_X_MAX;
+        int startTime = 0, endTime = 0;
+        for (; it2 != minEMap.end(); it2++) {
+            std::map<int, double>::iterator it3 = it2;
+            if( it2 != minEMap.begin() && (it2->first - (--it3)->first) > 1) {
+                tempList.clear();
+            }
+            if (tempList.size() < DBSCANWHYNOT->_k) {
+                tempList.push_back(it2);
+            }
+            else
+            {
+                tempList.pop_front();
+                tempList.push_back(it2);
+                double tempMax = DBSCANWHYNOT->_e;
+                std::list<std::map<int, double>::iterator>::iterator it3 = tempList.begin();
+                for (; it3 != tempList.end(); it3++) {
+                    if ((*it3)->second > tempMax) {
+                        tempMax = (*it3)->second;
+                    }
+                }
+                if(minE > tempMax)
+                {
+                    startTime = tempList.front()->first;
+                    endTime = tempList.back()->first;
+                    minE = tempMax;
+                }
+            }
+        }
+        result._e = sqrt(minE);
+        t_end = clock();
+        result._time = (double)(t_end-t_start)/CLOCKS_PER_SEC;
+        result._startTime = startTime;
+        result._endTime = endTime;
+        
+        resultVector.push_back(result);
+    }
+    
+    return resultVector;
+}
+
+bool Util::isInOneClass(std::vector<int>* trjVector, TrjNodeManage* trjNodeManage)
+{
+    std::vector<int>::iterator it = (*trjVector).begin();
+    int classId = trjNodeManage->_nodeMap[*(it)]->_belongDbscanClass->_id;
+    for (it ++ ; it != (*trjVector).end(); it ++) {
+        int tempClassId = trjNodeManage->_nodeMap[*(it)]->_belongDbscanClass->_id;
+        if (classId != tempClassId) {
+            return false;
+        }
+    }
+    return true;
+}
+
+ResultType Util::getMinK(std::vector<int> trjVector)
+{
+    ResultType result;
+    result._e = DBSCANWHYNOT->_e;
+    result._m = DBSCANWHYNOT->_m;
+    result._type = MOK;
+    clock_t t_start,t_end;
+    t_start = clock();
+    std::vector<int> contain;
+    std::map<int,TrjNodeManage*>::iterator it = DBSCANWHYNOT->_trjNodeManageMap.begin();
+    for (; it != DBSCANWHYNOT->_trjNodeManageMap.end(); it++) {
+        if (Util::isInOneClass(&trjVector, it->second)) {
+            contain.push_back(it->first);
+        }
+    }
+    
+    int k = 0, temp = 0, start = 0, end = 0;
+    std::vector<int>::iterator containIt = contain.begin();
+    for (; containIt != contain.end(); containIt++) {
+        if (containIt != contain.begin()) {
+            std::vector<int>::iterator tempFrontContainIt = containIt;
+            tempFrontContainIt--;
+            if ((*containIt - *tempFrontContainIt) > 1) {
+                if (temp > k) {
+                    k = temp;
+                    start = *containIt - k + 1;
+                    end = *containIt;
+                }
+                temp = 1;
+            }
+            else
+            {
+                temp++;
+            }
+        }
+        else
+        {
+             temp++;
+        }
+    }
+    
+    result._m = k;
+    result._startTime = start;
+    result._endTime = end;
+    t_end = clock();
+    result._time = (double)(t_end-t_start)/CLOCKS_PER_SEC;
+    
+    return result;
+}
+
 
 void Util::expendTrjNodes(std::vector<TrjNode*>* ignoreNode, std::vector<TrjNode*>* formalTrjNodes, double ee, int m)
 {
@@ -476,4 +621,58 @@ void Util::expendTrjNodes(std::vector<TrjNode*>* ignoreNode, std::vector<TrjNode
     }
 }
 
+std::vector<std::string> Util::readFileToVector(std::string filePath)
+{
+    std::vector<std::string> result;
+    std::ifstream file(filePath.c_str());
+    std::string  lineStr;
+    while(getline(file,lineStr))
+    {
+        result.push_back(lineStr);
+    }
+    return result;
+}
 
+std::string Util::readFile(std::string filePath)
+{
+    unsigned long * pSize;
+    unsigned char * pBuffer;
+    printf("file path %s", filePath.c_str());
+    FILE *fp = fopen(filePath.c_str(), "r");
+    
+    fseek(fp,0,SEEK_END);
+    *pSize = ftell(fp);
+    fseek(fp,0,SEEK_SET);
+    pBuffer = new unsigned char[*pSize];
+    *pSize = fread(pBuffer,sizeof(unsigned char), *pSize,fp);
+    fclose(fp);
+    std::string result = (char*)pBuffer;
+    return result;
+}
+
+void Util::writeFile(std::string filePath, std::vector<ResultType> result)
+{
+    std::string resultStr = "WhyNotType;CostTime;K;E;M;StartTime;EndTime";
+    std::vector<ResultType>::iterator it = result.begin();
+    for (; it != result.end(); it++) {
+        resultStr += "\n" + Util::intToString((int)(*it)._type)
+        + ";" + Util::doubleToString((*it)._time)
+        + ";" + Util::intToString((*it)._k)
+        + ";" + Util::intToString((*it)._m)
+        + ";" + Util::doubleToString((*it)._e)
+        + ";" + Util::intToString((*it)._startTime)
+        + ";" + Util::intToString((*it)._endTime);
+    }
+    
+    std::ofstream fout(filePath.c_str());
+    fout<<resultStr;
+}
+
+int Util::compareScore(ConvoyManage* oldConvoyM, ConvoyManage* newConvoyM)
+{
+    std::set<int> oldTrjNumber = oldConvoyM->getAppearNode(newConvoyM->getStartTime(), newConvoyM->getEndTime());
+    std::set<int> newTrjNumber = newConvoyM->getAppearNode(newConvoyM->getStartTime(), newConvoyM->getEndTime());
+    std::set<int> result(newTrjNumber.begin(), newTrjNumber.end());
+    result.insert(oldTrjNumber.begin(), oldTrjNumber.end());
+    return (int)(oldTrjNumber.size() + newTrjNumber.size() - result.size());
+}

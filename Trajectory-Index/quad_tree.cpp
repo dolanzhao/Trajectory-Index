@@ -150,7 +150,7 @@ void QuadTreeNode::separate()
     }
     
     if (!quadTreeNode1->_isBeMerge) {
-        if (quadTreeNode1->_trjNodeNumber <= CELL_NODE_MAX) {
+        if (quadTreeNode1->_trjNodeNumber <= CELL_NODE_MAX || ((quadTreeNode1->_xMax - quadTreeNode1->_xMin) * (quadTreeNode1->_xMax - quadTreeNode1->_xMin)< 0.0000000001 )) {
             quadTreeNode1->_isLeaf = true;
         }
         quadTreeNode1->separate();
@@ -161,7 +161,7 @@ void QuadTreeNode::separate()
         delete quadTreeNode1;
     }
     if (!quadTreeNode2->_isBeMerge) {
-        if (quadTreeNode2->_trjNodeNumber <= CELL_NODE_MAX) {
+        if (quadTreeNode2->_trjNodeNumber <= CELL_NODE_MAX || ((quadTreeNode2->_xMax - quadTreeNode2->_xMin) * (quadTreeNode2->_xMax - quadTreeNode2->_xMin)< 0.0000000001 )) {
             quadTreeNode2->_isLeaf = true;
         }
         quadTreeNode2->separate();
@@ -172,7 +172,7 @@ void QuadTreeNode::separate()
         delete quadTreeNode2;
     }
     if (!quadTreeNode3->_isBeMerge) {
-        if (quadTreeNode3->_trjNodeNumber <= CELL_NODE_MAX) {
+        if (quadTreeNode3->_trjNodeNumber <= CELL_NODE_MAX || ((quadTreeNode3->_xMax - quadTreeNode3->_xMin) * (quadTreeNode3->_xMax - quadTreeNode3->_xMin)< 0.0000000001 )) {
             quadTreeNode3->_isLeaf = true;
         }
         quadTreeNode3->separate();
@@ -183,7 +183,7 @@ void QuadTreeNode::separate()
         delete quadTreeNode3;
     }
     if (!quadTreeNode4->_isBeMerge) {
-        if (quadTreeNode4->_trjNodeNumber <= CELL_NODE_MAX) {
+        if (quadTreeNode4->_trjNodeNumber <= CELL_NODE_MAX || ((quadTreeNode4->_xMax - quadTreeNode4->_xMin) * (quadTreeNode4->_xMax - quadTreeNode4->_xMin)< 0.0000000001 )) {
             quadTreeNode4->_isLeaf = true;
         }
         quadTreeNode4->separate();

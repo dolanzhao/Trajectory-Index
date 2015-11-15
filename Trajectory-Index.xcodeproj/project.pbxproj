@@ -13,6 +13,7 @@
 		3E7487AF1BED152100F1819A /* trj_node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7487AD1BED152100F1819A /* trj_node.cpp */; };
 		3E7487B21BED1F2E00F1819A /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7487B01BED1F2E00F1819A /* util.cpp */; };
 		3ED87A5D1BF5D90700A0ED9C /* dbscan_whynot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3ED87A5B1BF5D90700A0ED9C /* dbscan_whynot.cpp */; };
+		3ED87AD21BF86EDF00A0ED9C /* convoy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3ED87AD01BF86EDF00A0ED9C /* convoy.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,6 +42,8 @@
 		3E7487B11BED1F2E00F1819A /* util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = util.hpp; sourceTree = "<group>"; };
 		3ED87A5B1BF5D90700A0ED9C /* dbscan_whynot.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dbscan_whynot.cpp; sourceTree = "<group>"; };
 		3ED87A5C1BF5D90700A0ED9C /* dbscan_whynot.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = dbscan_whynot.hpp; sourceTree = "<group>"; };
+		3ED87AD01BF86EDF00A0ED9C /* convoy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = convoy.cpp; sourceTree = "<group>"; };
+		3ED87AD11BF86EDF00A0ED9C /* convoy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = convoy.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +88,8 @@
 				3E7487B11BED1F2E00F1819A /* util.hpp */,
 				3ED87A5B1BF5D90700A0ED9C /* dbscan_whynot.cpp */,
 				3ED87A5C1BF5D90700A0ED9C /* dbscan_whynot.hpp */,
+				3ED87AD01BF86EDF00A0ED9C /* convoy.cpp */,
+				3ED87AD11BF86EDF00A0ED9C /* convoy.hpp */,
 			);
 			path = "Trajectory-Index";
 			sourceTree = "<group>";
@@ -149,6 +154,7 @@
 				3E7487AF1BED152100F1819A /* trj_node.cpp in Sources */,
 				3E7487A11BED0D7100F1819A /* main.cpp in Sources */,
 				3E53D33F1BF25F3700D51A12 /* dbscan_class.cpp in Sources */,
+				3ED87AD21BF86EDF00A0ED9C /* convoy.cpp in Sources */,
 				3E7487B21BED1F2E00F1819A /* util.cpp in Sources */,
 				3ED87A5D1BF5D90700A0ED9C /* dbscan_whynot.cpp in Sources */,
 			);
@@ -239,6 +245,8 @@
 		3E7487A51BED0D7100F1819A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = /usr/local/Cellar/boost/1.59.0/include/;
+				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/boost/1.59.0/lib/;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -246,6 +254,8 @@
 		3E7487A61BED0D7100F1819A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = /usr/local/Cellar/boost/1.59.0/include/;
+				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/boost/1.59.0/lib/;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

@@ -58,31 +58,32 @@ double TrjNode::getTrjNodeY()
 bool TrjNode::init(std::string nodeTextData)
 {
     std::vector<std::string> splitResult = Util::split(nodeTextData, NodeInternalDateSep);
-    if(splitResult.size() != 3)
+    if(splitResult.size() != 2)
     {
-        printf("销毁数据有误，数据缺失");//for debug
+        printf("销毁数据有误，数据缺失\n");//for debug
         _isInitSuccess = false;
         return false;
     }
     _id = Util::stringToInt(splitResult[0]);
     if(_id < NODE_ID_MIN)
     {
-        printf("销毁数据有误，id越界");//for debug
+        printf("销毁数据有误，id越界\n");//for debug
         _isInitSuccess = false;
         return false;
     }
-    _x = Util::stringToInt(splitResult[1]);
+    std::vector<std::string> xyResult = Util::split(splitResult[1], ",");
+    _x = Util::stringToDouble(xyResult[0]);
     if(_x <= NODE_X_MIN && _x >= NODE_X_MAX)
     {
-        printf("销毁数据有误，数据点x坐标越界");//for debug
+        printf("销毁数据有误，数据点x坐标越界\n");//for debug
         _isInitSuccess = false;
         return false;
     }
     
-    _y = Util::stringToInt(splitResult[2]);
+    _y = Util::stringToDouble(xyResult[1]);
     if(_y <= NODE_Y_MIN && _y>= NODE_Y_MAX)
     {
-        printf("销毁数据有误，数据点y坐标越界");//for debug
+        printf("销毁数据有误，数据点y坐标越界\n");//for debug
         _isInitSuccess = false;
         return false;
     }
@@ -149,6 +150,7 @@ void TrjNodeManage::init(std::string textData)
     for (; nodeIt != _nodeMap.end(); nodeIt++) {
         delete nodeIt->second;
     }
+    _nodeMap.clear();
     
     double xMax = 0, xMin = 0, yMax = 0, yMin = 0;
     std::vector<std::string> splitResult = Util::split(textData, NodeDateSep);
@@ -173,6 +175,14 @@ void TrjNodeManage::init(std::string textData)
         }
     }
     _quadTree = new QuadTree();
+    if ((xMax - xMin) > (yMax - yMin)) {
+        yMin = (yMax + yMin) * 0.5 - (xMax - xMin) * 0.5;
+        yMax = (yMax + yMin) * 0.5 + (xMax - xMin) * 0.5;
+    }
+    else{
+        xMin = (xMax + xMin) * 0.5 - (yMax - yMin) * 0.5;
+        xMax = (xMax + xMin) * 0.5 + (yMax - yMin) * 0.5;
+    }
     QuadTreeNode* rootNode = QuadTreeNode::create(xMin, yMin, xMax, yMax, _quadTree, NULL);
     
     

@@ -21,13 +21,13 @@ public:
     
     ~DbscanClass();
     
-    static DbscanClass* create(std::string data);
+    static DbscanClass* create(std::string data, int time);
     
     std::vector<TrjNode*> getTrjNodeBelongQuadTreeNode(QuadTreeNode* node);
     
 private:
     
-    bool init(std::string data);
+    bool init(std::string data, int time);
     
     void addNode(TrjNode* node);
     

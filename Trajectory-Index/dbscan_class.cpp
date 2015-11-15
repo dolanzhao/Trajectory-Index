@@ -28,46 +28,47 @@ DbscanClass::~DbscanClass()
     }
 }
 
-DbscanClass* DbscanClass::create(std::string data)
+DbscanClass* DbscanClass::create(std::string data, int time)
 {
     DbscanClass* dbscanClass = new DbscanClass();
-    if (dbscanClass->init(data)) {
+    if (dbscanClass->init(data, time)) {
         return dbscanClass;
     }
     delete dbscanClass;
     return NULL;
 }
 
-bool DbscanClass::init(std::string data)
+bool DbscanClass::init(std::string data, int time)
 {
     std::vector<std::string> splitResult = Util::split(data, NodeInternalDateSep);
     if(splitResult.size() < 2)
     {
-        printf("销毁数据有误，数据缺失");//for debug
+        printf("%s \n", data.c_str());//for debug
+        printf("dbscan 销毁数据有误，数据缺失\n");//for debug
         _isInitSuccess = false;
         return false;
     }
     _id = Util::stringToInt(splitResult[0]);
     if(_id < CLASS_ID_MIN)
     {
-        printf("销毁数据有误，class id越界");//for debug
+        printf("销毁数据有误，class id越界\n");//for debug
         _isInitSuccess = false;
         return false;
     }
     std::vector<std::string>::iterator it = splitResult.begin();
     for (it ++ ; it != splitResult.end(); it ++) {
         int nodeId = Util::stringToInt(*it);
-        if (nodeId > DBSCANWHYNOT->_trjNodeManageMap[_id]->_maxId || nodeId < DBSCANWHYNOT->_trjNodeManageMap[_id]->_minId) {
-            printf("销毁数据有误，class:%d 中 node id:%d 越界", _id, nodeId);//for debug
+        if (nodeId > DBSCANWHYNOT->_trjNodeManageMap[time]->_maxId || nodeId < DBSCANWHYNOT->_trjNodeManageMap[time]->_minId) {
+            printf("销毁数据有误，class:%d 中 node id:%d 越界, time: %d\n", _id, nodeId, time);//for debug
             _isInitSuccess = false;
             return false;
         }
         else
         {
-            this->addNode(DBSCANWHYNOT->_trjNodeManageMap[_id]->_nodeMap[nodeId]);
+            this->addNode(DBSCANWHYNOT->_trjNodeManageMap[time]->_nodeMap[nodeId]);
         }
     }
-    printf("创建簇，class:%d\n", _id);//for debug
+//    printf("创建簇，class:%d\n", _id);//for debug
     _isInitSuccess = true;
     return true;
 }
@@ -123,19 +124,15 @@ DbscanClassManage::~DbscanClassManage()
 
 void DbscanClassManage::init(std::string textData)
 {
-    std::map<int, DbscanClass*>::iterator dbscanIt = _dbscanClassMap.begin();
-    for (; dbscanIt != _dbscanClassMap.end(); dbscanIt++) {
-        delete dbscanIt->second;
-    }
-    _dbscanClassMap.clear();
-    
     std::vector<std::string> splitResult = Util::split(textData, NodeDateSep);
     _time = Util::stringToInt(splitResult[0]);
     std::vector<std::string>::iterator it = splitResult.begin();
     for(it++; it != splitResult.end(); it++) {
-        DbscanClass* dbscanClass = DbscanClass::create(*it);
-        if (dbscanClass) {
-            _dbscanClassMap.insert(std::map<int, DbscanClass*>::value_type(dbscanClass->_id, dbscanClass));
+        if (std::strcmp("", (*it).c_str()) != 0) {
+            DbscanClass* dbscanClass = DbscanClass::create(*it, _time);
+            if (dbscanClass) {
+                _dbscanClassMap.insert(std::map<int, DbscanClass*>::value_type(dbscanClass->_id, dbscanClass));
+            }
         }
     }
 }

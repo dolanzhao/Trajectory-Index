@@ -23,7 +23,11 @@ public:
     
     static void purgeInstance();
 
-    void init(std::string trjNodeData, std::string dbscanClassData, int k, double e, int m);
+    void initNode(std::string nodeFilePath);
+    
+    void updateDbscanClass(std::string dbscanClassDataPath, std::string dbscanArgvData);
+    
+    void addTimeTargetSet(int minTime, int maxTime, int targetContainNodeId);
     
 private:
     
@@ -40,6 +44,10 @@ public:
     int _m;
     
     int _timeNumber;
+    
+    int _misId;
+    
+    std::map<int, int> _timeTargetMap;
     
     std::map<int,DbscanClassManage*> _dbscanClassManageMap;
     

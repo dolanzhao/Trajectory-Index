@@ -15,11 +15,18 @@
 class TrjNode;
 class QuadTreeNode;
 class DbscanClass;
+class TrjNodeManage;
+class Convoy;
+class ConvoyManage;
 class Util
 {
 public:
     
     static std::vector<std::string> split(const  std::string& s, const std::string& delim);
+    
+    static std::string intToString(int num);
+    
+    static std::string doubleToString(double num);
     
     static int stringToInt(const std::string& str);
     
@@ -61,9 +68,23 @@ public:
     
     static std::map<int, double> getNewME(int t, int dbscanClassId, int trjNodeId, int m, double ee);
     
-    static ResultType getMinE(int dbscanClassId, int trjNodeId);
+    static ResultType getMinE();
     
-    static ResultType getMinM(int dbscanClassId, int trjNodeId);
+    static ResultType getMinM();
+    
+    static ResultType getMinK(std::vector<int> trjVector);
+    
+    static bool isInOneClass(std::vector<int>* trjVector, TrjNodeManage* trjNodeManage);
+    
+    static std::vector<ResultType>  getMinME();
+    
+    static std::string readFile(std::string filePath);
+    
+    static std::vector<std::string> readFileToVector(std::string filePath);
+    
+    static void writeFile(std::string filePath, std::vector<ResultType> result);
+    
+    static int compareScore(ConvoyManage* oldConvoyM, ConvoyManage* newConvoyM);
     
 };
 

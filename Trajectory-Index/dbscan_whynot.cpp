@@ -54,24 +54,50 @@ DbscanWhynot::~DbscanWhynot()
     
 }
 
-void DbscanWhynot::init(std::string trjNodeData, std::string dbscanClassData, int k, double e, int m)
+void DbscanWhynot::initNode(std::string nodeFilePath)
 {
-    _k = k, _e = e, _m = m;
-    std::vector<std::string> trjNodeDataVector = Util::split(trjNodeData, "#");
-    std::vector<std::string> dbscanClassDataVector = Util::split(dbscanClassData, "#");
     
-    std::vector<std::string>::iterator trjDataIt;
-    std::vector<std::string>::iterator dbscanDataIt;
+    std::ifstream file(nodeFilePath.c_str());
+    std::string  lineStr;
     _timeNumber = 0;
-    for (; trjDataIt != trjNodeDataVector.begin(); trjDataIt++) {
-        TrjNodeManage*trjNodeManage = TrjNodeManage::create(*trjDataIt);
+    while(getline(file,lineStr))
+    {
+        TrjNodeManage*trjNodeManage = TrjNodeManage::create(lineStr);
         _trjNodeManageMap.insert(std::map<int, TrjNodeManage*>::value_type(trjNodeManage->_time, trjNodeManage));
         _timeNumber++;
     }
+}
+
+void DbscanWhynot::updateDbscanClass(std::string dbscanClassDataPath, std::string dbscanArgvData)
+{
+    std::vector<std::string> argvVector =  Util::split(dbscanArgvData, ";");
+    _k = Util::stringToInt(argvVector[0]), _m = Util::stringToInt(argvVector[1]), _e = Util::stringToDouble(argvVector[2]), _misId = Util::stringToInt(argvVector[3]);
     
-    for (; dbscanDataIt != dbscanClassDataVector.begin(); dbscanDataIt++) {
-        DbscanClassManage* dbscanClassManage = DbscanClassManage::create(*dbscanDataIt);
-        _dbscanClassManageMap.insert(std::map<int, DbscanClassManage*>::value_type(dbscanClassManage->_time, dbscanClassManage));
+    std::map<int,DbscanClassManage*>::iterator it2 = _dbscanClassManageMap.begin();
+    for (; it2 != _dbscanClassManageMap.end(); it2++) {
+        delete it2->second;
+    }
+    _dbscanClassManageMap.clear();
+    
+    std::vector<std::string> dbscanClassDataVector = Util::readFileToVector(dbscanClassDataPath);
+    std::vector<std::string>::iterator dbscanDataIt = dbscanClassDataVector.begin();
+    for (; dbscanDataIt != dbscanClassDataVector.end(); dbscanDataIt++) {
+        if (std::strcmp("", (*dbscanDataIt).c_str()) != 0) {
+            DbscanClassManage* dbscanClassManage = DbscanClassManage::create(*dbscanDataIt);
+            _dbscanClassManageMap.insert(std::map<int, DbscanClassManage*>::value_type(dbscanClassManage->_time, dbscanClassManage));
+        }
+        
+    }
+    
+    _timeTargetMap.clear();
+}
+
+void DbscanWhynot::addTimeTargetSet(int minTime, int maxTime, int targetContainNodeId)
+{
+    for(int i = minTime; i <= maxTime; i++)
+    {
+        DbscanClass* tempDbscanClass = DBSCANWHYNOT->_trjNodeManageMap[i]->_nodeMap[targetContainNodeId]->_belongDbscanClass;
+       _timeTargetMap.insert(std::map<int, int>::value_type(i, tempDbscanClass->_id));
     }
 }
 
