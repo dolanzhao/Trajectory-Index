@@ -79,7 +79,7 @@ std::set<int> ConvoyManage::getAppearNode(int start, int end)
     std::set<int> result;
     std::map<int, Convoy*>::iterator it = _convoyMap.begin();
     for (; it != _convoyMap.end(); it++) {
-        if ((it->second)->_startTime >= end && (it->second)->_endTime <= start) {
+        if ((it->second)->_startTime >= start && (it->second)->_endTime >= end) {
             result.insert((it->second)->_trjNodeId.begin(), (it->second)->_trjNodeId.end());
         }
     }
@@ -89,6 +89,9 @@ std::set<int> ConvoyManage::getAppearNode(int start, int end)
 
 int ConvoyManage::getStartTime()
 {
+    if (_convoyMap.size() == 0) {
+        return 0;
+    }
     std::map<int, Convoy*>::iterator it = _convoyMap.begin();
     int result = it->second->_startTime;
     for (it++ ; it != _convoyMap.end(); it++) {
@@ -101,6 +104,9 @@ int ConvoyManage::getStartTime()
 
 int ConvoyManage::getEndTime()
 {
+    if (_convoyMap.size() == 0) {
+        return 0;
+    }
     std::map<int, Convoy*>::iterator it = _convoyMap.begin();
     int result = it->second->_endTime;
     for (it++ ; it != _convoyMap.end(); it++) {

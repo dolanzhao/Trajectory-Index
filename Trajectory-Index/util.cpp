@@ -206,26 +206,27 @@ bool Util::vectorContainTrjNode(TrjNode* node, std::vector<TrjNode*>* container)
 
 double Util::distanceSqu(TrjNode* trjNode, DbscanClass* dbNode)
 {
-    double result = (NODE_X_MAX - NODE_X_MIN) * (NODE_X_MAX - NODE_X_MIN);
-    std::vector<QuadTreeNode*> tempQtNode = dbNode->_containQuadTreeNode;
+    double result = 0;
+//    std::vector<QuadTreeNode*> tempQtNode = dbNode->_containQuadTreeNode;
     std::vector<TrjNode*> tempTrjNode = dbNode->_containNodes;
-    std::vector<QuadTreeNode*>::iterator tempIt = tempQtNode.begin();
-    for (; tempIt != tempQtNode.end(); tempIt++) {
-        if (Util::minDistanceSqu(trjNode, *tempIt) >= result) {
-            continue;
-        }
-        std::vector<TrjNode*> tempTrjNode = dbNode->getTrjNodeBelongQuadTreeNode(*tempIt);
+//    std::vector<QuadTreeNode*>::iterator tempIt = tempQtNode.begin();
+    
+//    for (; tempIt != tempQtNode.end(); tempIt++) {
+//        if (Util::minDistanceSqu(trjNode, *tempIt) >= result) {
+//            continue;
+//        }
+//        std::vector<TrjNode*> tempTrjNode = dbNode->getTrjNodeBelongQuadTreeNode(*tempIt);
         std::vector<TrjNode*>::iterator tempInIt = tempTrjNode.begin();
         for (; tempInIt != tempTrjNode.end(); tempInIt++) {
             double tempDis = Util::distanceSqu(trjNode, *tempInIt);
-            if(trjNode->_belongTrjNodeManage->getCoverTrjByRR(*tempInIt, tempDis).size() >= DBSCANWHYNOT->_m)
-            {
-                if (result > tempDis) {
+//            if(trjNode->_belongTrjNodeManage->getCoverTrjByRR(*tempInIt, tempDis).size() >= DBSCANWHYNOT->_m)
+//            {
+                if (result < tempDis) {
                     result = tempDis;
                 }
-            }
+//            }
         }
-    }
+//    }
     
     return result;
 }
@@ -251,6 +252,34 @@ std::list<double> Util::getDistanceSortToUpList(DbscanClass* dbNode, std::vector
         result.push_back(temp);
     }
     result.sort();
+    return result;
+}
+
+std::set<double> Util::getAllDistanceSortToUpList(std::vector<TrjNode*>* trjNodeVector)
+{
+    std::set<double> result;
+    std::vector<TrjNode*>::iterator it = trjNodeVector->begin();
+    for(; it != trjNodeVector->end(); it++)
+    {
+        std::vector<TrjNode*>::iterator it2 = trjNodeVector->begin();
+        for (; it2 != trjNodeVector->end(); it2++) {
+            result.insert(Util::distanceSqu(*it, *it2));
+        }
+    }
+    return result;
+}
+
+std::set<double> Util::getAllDistanceSortToUpList(std::map<int, TrjNode*>* trjNodeMap)
+{
+    std::set<double> result;
+    std::map<int, TrjNode*>::iterator it = trjNodeMap->begin();
+    for(; it != trjNodeMap->end(); it++)
+    {
+        std::map<int, TrjNode*>::iterator it2 = trjNodeMap->begin();
+        for (; it2 != trjNodeMap->end(); it2++) {
+            result.insert(Util::distanceSqu(it->second, it2->second));
+        }
+    }
     return result;
 }
 
@@ -284,22 +313,23 @@ double Util::getNewE(int t, int dbscanClassId, int trjNodeId, int m, double ee)
     std::vector<TrjNode*> formalTrjNodes = dbNode->_containNodes;
     std::vector<TrjNode*> ignoreNode;
     Util::expendTrjNodes(&ignoreNode, &formalTrjNodes, result, m);
-    std::vector<TrjNode*> tempVector = Util::trjNodeVectorPlus(&formalTrjNodes, &(dbNode->_containNodes));
-    std::list<double> resultList = Util::getDistanceSortToUpList(dbNode, &tempVector);
-    std::list<double>::iterator it = resultList.begin();
-    for (; it != resultList.end(); it++) {
-        if (*it < result) {
+//    std::vector<TrjNode*> tempVector = Util::trjNodeVectorPlus(&formalTrjNodes, &(dbNode->_containNodes));
+//    std::list<double> resultList = Util::getDistanceSortToUpList(dbNode, &tempVector);
+    std::set<double> resultSet = Util::getAllDistanceSortToUpList(&(trjNode->_belongTrjNodeManage->_nodeMap));
+    std::set<double>::iterator it = resultSet.begin();
+    for (; it != resultSet.end(); it++) {
+        if (*it <= result && *it > ee) {
             ignoreNode.clear();
-            if (trjNode->_belongDbscanClass->getId() == -1 && trjNode->_belongTrjNodeManage->getCoverTrj(trjNode, *it).size() < m) {
-                break;
-            }
+//            if (trjNode->_belongDbscanClass->getId() == -1 && trjNode->_belongTrjNodeManage->getCoverTrj(trjNode, *it).size() < m) {
+//                break;
+//            }
             std::vector<TrjNode*> tempTrjNodes = dbNode->_containNodes;
             Util::expendTrjNodes(&ignoreNode, &tempTrjNodes, *it, m);
             if (Util::vectorContainTrjNode(trjNode, &tempTrjNodes)) {
                 return *it;
             }
         }
-        else
+        else if(*it > result)
         {
             break;
         }
@@ -386,7 +416,7 @@ ResultType Util::getMinE()
         if (tempList.size() < DBSCANWHYNOT->_k) {
             tempList.push_back(it2);
             if (tempList.size() ==  DBSCANWHYNOT->_k) {
-                double tempMax = DBSCANWHYNOT->_e;
+                double tempMax = DBSCANWHYNOT->_e * DBSCANWHYNOT->_e;
                 std::list<std::map<int, double>::iterator>::iterator it3 = tempList.begin();
                 for (; it3 != tempList.end(); it3++) {
                     if ((*it3)->second > tempMax) {
@@ -405,7 +435,7 @@ ResultType Util::getMinE()
         {
             tempList.pop_front();
             tempList.push_back(it2);
-            double tempMax = DBSCANWHYNOT->_e;
+            double tempMax = DBSCANWHYNOT->_e * DBSCANWHYNOT->_e;
             std::list<std::map<int, double>::iterator>::iterator it3 = tempList.begin();
             for (; it3 != tempList.end(); it3++) {
                 if ((*it3)->second > tempMax) {
@@ -458,18 +488,20 @@ ResultType Util::getMinM()
         }
         if (tempList.size() < DBSCANWHYNOT->_k) {
             tempList.push_back(it2);
-            int tempMin = DBSCANWHYNOT->_m;
-            std::list<std::map<int, int>::iterator>::iterator it3 = tempList.begin();
-            for (; it3 != tempList.end(); it3++) {
-                if ((*it3)->second < tempMin) {
-                    tempMin = (*it3)->second;
+            if (tempList.size() ==  DBSCANWHYNOT->_k) {
+                int tempMin = DBSCANWHYNOT->_m;
+                std::list<std::map<int, int>::iterator>::iterator it3 = tempList.begin();
+                for (; it3 != tempList.end(); it3++) {
+                    if ((*it3)->second < tempMin) {
+                        tempMin = (*it3)->second;
+                    }
                 }
-            }
-            if(maxM < tempMin)
-            {
-                startTime = tempList.front()->first;
-                endTime = tempList.back()->first;
-                maxM = tempMin;
+                if(maxM < tempMin)
+                {
+                    startTime = tempList.front()->first;
+                    endTime = tempList.back()->first;
+                    maxM = tempMin;
+                }
             }
         }
         else
@@ -733,11 +765,50 @@ void Util::writeFile(std::string filePath, std::vector<ResultType> result)
     fout<<resultStr;
 }
 
+void Util::writeFileQuery(std::string filePath, std::string dataSet, std::string mindataSet, std::vector<ResultType> result)
+{
+    std::string resultStr = "";
+    int i = 0;
+    std::vector<ResultType>::iterator it = result.begin();
+    for (; it != result.end(); it++, i++) {
+        if (it != result.begin()) {
+            resultStr += "\n";
+        }
+        resultStr += Util::intToString((int)(*it)._type)
+        + ";" + Util::intToString(i)
+        + ";" + Util::doubleToString((*it)._time)
+        + "|query" + ";"+ dataSet + ";" + dataSet
+        + ";" + mindataSet
+        + ";" + Util::intToString((*it)._k)
+        + ";" + Util::doubleToString((*it)._e)
+        + ";" + Util::intToString((*it)._m)
+        + ";interval"
+        + ";" + Util::intToString((*it)._startTime)
+        + ";" + Util::intToString((*it)._endTime);
+        resultStr += "\n"
+        + Util::intToString((int)(*it)._type)
+        + ";" + Util::intToString(i)
+        + ";" + Util::doubleToString((*it)._time)
+        + "|query"
+        + ";" + dataSet + ";" + dataSet
+        + ";" + mindataSet
+        + ";" + Util::intToString((*it)._k)
+        + ";" + Util::doubleToString((*it)._e)
+        + ";" + Util::intToString((*it)._m)
+        + ";all";
+        int dateSetNum = Util::stringToInt(mindataSet);
+        resultStr += ";" +  Util::intToString(((int)(dateSetNum/10)) * 10);
+    }
+    
+    std::ofstream fout(filePath.c_str());
+    fout<<resultStr;
+}
+
 int Util::compareScore(ConvoyManage* oldConvoyM, ConvoyManage* newConvoyM)
 {
     std::set<int> oldTrjNumber = oldConvoyM->getAppearNode(newConvoyM->getStartTime(), newConvoyM->getEndTime());
     std::set<int> newTrjNumber = newConvoyM->getAppearNode(newConvoyM->getStartTime(), newConvoyM->getEndTime());
     std::set<int> result(newTrjNumber.begin(), newTrjNumber.end());
     result.insert(oldTrjNumber.begin(), oldTrjNumber.end());
-    return (int)(oldTrjNumber.size() + newTrjNumber.size() - result.size());
+    return (int)(2 * result.size() - oldTrjNumber.size() - newTrjNumber.size());
 }

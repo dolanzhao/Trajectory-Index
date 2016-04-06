@@ -41,7 +41,7 @@ class ConvoyManage
 {
 public:
     
-    static ConvoyManage* create(std::string textData, std::string key);
+    static ConvoyManage* create(std::string filePath, std::string key);
     
     ConvoyManage();
     

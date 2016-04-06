@@ -54,6 +54,7 @@ typedef struct{
 
 
 #define FileLocal "/Users/dolan/workspace/GitClone/RExDBSCAN/dataset/"
+#define ResultLocal "/Users/dolan/workspace/GitClone/RExDBSCAN/datesetreconvey/"
 enum DataSet
 {
 //    BusTrj = 0,
@@ -62,7 +63,8 @@ enum DataSet
 //    TdriveTrj,
 //    TgpsTrj,
 //    TruckTrj,
-    Test,
+//    Test,
+    Time,
     DataSetNumber
 };
 
@@ -70,11 +72,12 @@ const std::string DataSetStr[] =
 {
 //    "bus",
 //    "chameleon",
-//    "synthetic",
+//    "syn",
 //    "tdrive",
 //    "tgps",
 //    "truck",
-    "test"
+//    "test"
+    "time"
 };
 
 #endif /* def_h */

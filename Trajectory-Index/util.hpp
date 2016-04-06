@@ -62,6 +62,10 @@ public:
     
     static std::list<double> getDistanceSortToUpList(DbscanClass* dbNode, std::vector<TrjNode*>* trjNodeVector);
     
+    static std::set<double> getAllDistanceSortToUpList(std::vector<TrjNode*>* trjNodeVector);
+    
+    static std::set<double> getAllDistanceSortToUpList(std::map<int, TrjNode*>* trjNodeMap);
+    
     static double getNewE(int t, int dbscanClassId, int trjNodeId, int m, double ee);
     
     static int getNewM(int t, int dbscanClassId, int trjNodeId, int m, double ee);
@@ -83,6 +87,8 @@ public:
     static std::vector<std::string> readFileToVector(std::string filePath);
     
     static void writeFile(std::string filePath, std::vector<ResultType> result);
+    
+    static void writeFileQuery(std::string filePath, std::string dataSet, std::string mindataSet, std::vector<ResultType> result);
     
     static int compareScore(ConvoyManage* oldConvoyM, ConvoyManage* newConvoyM);
     

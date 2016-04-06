@@ -232,7 +232,15 @@ std::vector<TrjNode*> TrjNodeManage::getCoverTrjByRR(int id, double rr)
 
 std::vector<TrjNode*> TrjNodeManage::getCoverTrjByRR(TrjNode* trjNode, double rr)
 {
-    return Util::getCoverTrjByRR(trjNode, *(_quadTree->_quadTreeNodeCache.begin()), rr);
+    std::vector<TrjNode*> result;
+    std::map<int, TrjNode*>::iterator it = trjNode->_belongTrjNodeManage->_nodeMap.begin();
+    for (; it != trjNode->_belongTrjNodeManage->_nodeMap.end(); it++) {
+        if (Util::distanceSqu(trjNode, it->second) <= rr) {
+            result.push_back(it->second);
+        }
+    }
+    return result;
+//    return Util::getCoverTrjByRR(trjNode, *(_quadTree->_quadTreeNodeCache.begin()), rr);
 }
 
 int TrjNodeManage::getPreciseNumber(int id, double r)
